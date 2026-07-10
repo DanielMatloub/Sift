@@ -4,3 +4,4 @@ anthropic
 python-dotenv
 pydantic
 stripe
+psycopg2-binary
