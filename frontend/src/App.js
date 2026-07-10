@@ -59,7 +59,7 @@ export default function App() {
     setLoading(true);
     setResult(null);
     try {
-      const res = await fetch("http://localhost:8000/analyze", {
+      const res = await fetch("https://sift-production-ebf0.up.railway.app/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: imageData, media_type: "image/jpeg" })
