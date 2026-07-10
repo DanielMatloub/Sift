@@ -5,42 +5,6 @@ export default function App() {
   const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [cameraActive, setCameraActive] = useState(false);
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
-
-  async function startCamera() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }
-      });
-      streamRef.current = stream;
-      videoRef.current.srcObject = stream;
-      setCameraActive(true);
-    } catch (err) {
-      alert("Camera access denied. Please allow camera access and try again.");
-    }
-  }
-
-  function stopCamera() {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
-    setCameraActive(false);
-  }
-
-  function capturePhoto() {
-    const canvas = document.createElement("canvas");
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
-    const dataUrl = canvas.toDataURL("image/jpeg");
-    setImage(dataUrl);
-    setImageData(dataUrl.split(",")[1]);
-    setResult(null);
-    stopCamera();
-  }
 
   function handleUpload(e) {
     const file = e.target.files[0];
@@ -76,7 +40,6 @@ export default function App() {
     setImage(null);
     setImageData(null);
     setResult(null);
-    stopCamera();
   }
 
   return (
@@ -94,19 +57,15 @@ export default function App() {
 
       <div style={{ width: "100%", maxWidth: "480px", padding: "24px 16px" }}>
 
-        {/* Camera or image preview */}
+        {/* Image preview */}
         <div style={{
           width: "100%", aspectRatio: "1", background: "#e5e5e5",
           borderRadius: "16px", overflow: "hidden", position: "relative",
           marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center"
         }}>
-          {cameraActive && (
-            <video ref={videoRef} autoPlay playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          )}
-          {image && !cameraActive && (
+          {image ? (
             <img src={image} alt="captured" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          )}
-          {!image && !cameraActive && (
+          ) : (
             <span style={{ color: "#aaa", fontSize: "14px" }}>No image selected</span>
           )}
         </div>
@@ -146,41 +105,18 @@ export default function App() {
 
         {/* Buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {!cameraActive && !image && (
-            <>
-              <button
-                onClick={startCamera}
-                style={{
-                  padding: "14px", borderRadius: "10px", background: "#222",
-                  color: "#fff", border: "none", fontSize: "15px", cursor: "pointer"
-                }}
-              >
-                Take a photo
-              </button>
-              <label style={{
-                padding: "14px", borderRadius: "10px", background: "#fff",
-                color: "#222", border: "1px solid #ddd", fontSize: "15px",
-                cursor: "pointer", textAlign: "center"
-              }}>
-                Upload a photo
-                <input type="file" accept="image/*" onChange={handleUpload} style={{ display: "none" }} />
-              </label>
-            </>
+          {!image && (
+            <label style={{
+              padding: "14px", borderRadius: "10px", background: "#222",
+              color: "#fff", border: "none", fontSize: "15px",
+              cursor: "pointer", textAlign: "center", display: "block"
+            }}>
+              Take or upload a photo
+              <input type="file" accept="image/*" capture="environment" onChange={handleUpload} style={{ display: "none" }} />
+            </label>
           )}
 
-          {cameraActive && (
-            <button
-              onClick={capturePhoto}
-              style={{
-                padding: "14px", borderRadius: "10px", background: "#222",
-                color: "#fff", border: "none", fontSize: "15px", cursor: "pointer"
-              }}
-            >
-              Capture
-            </button>
-          )}
-
-          {image && !cameraActive && !loading && (
+          {image && !loading && (
             <>
               {!result && (
                 <button
