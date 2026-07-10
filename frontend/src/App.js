@@ -36,6 +36,14 @@ export default function App() {
     setLoading(false);
   }
 
+  async function handleCheckout() {
+    const res = await fetch("https://sift-production-ebf0.up.railway.app/create-checkout-session", {
+      method: "POST"
+    });
+    const data = await res.json();
+    window.location.href = data.url;
+  }
+
   function reset() {
     setImage(null);
     setImageData(null);
@@ -47,7 +55,6 @@ export default function App() {
       minHeight: "100vh", background: "#f5f5f3", fontFamily: "sans-serif",
       display: "flex", flexDirection: "column", alignItems: "center"
     }}>
-      {/* Header */}
       <div style={{
         width: "100%", padding: "16px 24px", background: "#fff",
         borderBottom: "1px solid #e5e5e5", display: "flex", alignItems: "center"
@@ -57,7 +64,6 @@ export default function App() {
 
       <div style={{ width: "100%", maxWidth: "480px", padding: "24px 16px" }}>
 
-        {/* Image preview */}
         <div style={{
           width: "100%", aspectRatio: "1", background: "#e5e5e5",
           borderRadius: "16px", overflow: "hidden", position: "relative",
@@ -70,31 +76,51 @@ export default function App() {
           )}
         </div>
 
-        {/* Result */}
         {result && !loading && (
-          <div style={{
-            background: result.recyclable ? "#e8f5e9" : "#fce4ec",
-            borderRadius: "12px", padding: "16px", marginBottom: "16px", textAlign: "center"
-          }}>
-            {result.error ? (
+          result.error === "limit_reached" ? (
+            <div style={{ textAlign: "center", padding: "16px", background: "#fff", borderRadius: "12px", marginBottom: "16px" }}>
+              <div style={{ fontSize: "32px", marginBottom: "12px" }}>🔒</div>
+              <p style={{ fontWeight: "600", fontSize: "16px", marginBottom: "8px" }}>You've used your 10 free analyses</p>
+              <p style={{ color: "#666", fontSize: "14px", marginBottom: "20px" }}>Unlock unlimited analyses for a one-time payment of $3.</p>
+              <button
+                onClick={handleCheckout}
+                style={{
+                  background: "#222", color: "#fff", border: "none",
+                  padding: "12px 24px", borderRadius: "8px", fontSize: "15px",
+                  cursor: "pointer", width: "100%"
+                }}
+              >
+                Unlock unlimited — $3
+              </button>
+            </div>
+          ) : result.error ? (
+            <div style={{ background: "#fce4ec", borderRadius: "12px", padding: "16px", marginBottom: "16px", textAlign: "center" }}>
               <p style={{ color: "#888" }}>{result.error}</p>
-            ) : (
-              <>
-                <div style={{ fontSize: "48px", marginBottom: "8px" }}>
-                  {result.recyclable ? "♻️" : "🗑️"}
-                </div>
-                <div style={{ fontWeight: "700", fontSize: "20px", marginBottom: "4px" }}>
-                  {result.recyclable ? "Recyclable" : "Not Recyclable"}
-                </div>
-                <div style={{ fontSize: "14px", color: "#555", marginBottom: "4px" }}>
-                  {result.item}
-                </div>
-                <div style={{ fontSize: "13px", color: "#777" }}>
-                  {result.reason}
-                </div>
-              </>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div style={{
+              background: result.recyclable ? "#e8f5e9" : "#fce4ec",
+              borderRadius: "12px", padding: "16px", marginBottom: "16px", textAlign: "center"
+            }}>
+              <div style={{ fontSize: "48px", marginBottom: "8px" }}>
+                {result.recyclable ? "♻️" : "🗑️"}
+              </div>
+              <div style={{ fontWeight: "700", fontSize: "20px", marginBottom: "4px" }}>
+                {result.recyclable ? "Recyclable" : "Not Recyclable"}
+              </div>
+              <div style={{ fontSize: "14px", color: "#555", marginBottom: "4px" }}>
+                {result.item}
+              </div>
+              <div style={{ fontSize: "13px", color: "#777", marginBottom: "8px" }}>
+                {result.reason}
+              </div>
+              {result.analyses_remaining !== undefined && result.analyses_remaining <= 3 && (
+                <p style={{ color: "#888", fontSize: "12px", marginTop: "8px" }}>
+                  {result.analyses_remaining} free {result.analyses_remaining === 1 ? "analysis" : "analyses"} remaining.
+                </p>
+              )}
+            </div>
+          )
         )}
 
         {loading && (
@@ -103,7 +129,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {!image && (
             <label style={{
