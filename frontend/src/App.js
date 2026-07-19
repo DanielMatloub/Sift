@@ -50,6 +50,24 @@ export default function App() {
     setResult(null);
   }
 
+  const disposalColor = (disposal) => {
+    if (disposal === "recycle") return "#e8f5e9";
+    if (disposal === "compost") return "#fff8e1";
+    return "#fce4ec";
+  };
+
+  const disposalEmoji = (disposal) => {
+    if (disposal === "recycle") return "♻️";
+    if (disposal === "compost") return "🌱";
+    return "🗑️";
+  };
+
+  const disposalLabel = (disposal) => {
+    if (disposal === "recycle") return "Recyclable";
+    if (disposal === "compost") return "Compostable";
+    return "Trash";
+  };
+
   return (
     <div style={{
       minHeight: "100vh", background: "#f5f5f3", fontFamily: "sans-serif",
@@ -99,14 +117,14 @@ export default function App() {
             </div>
           ) : (
             <div style={{
-              background: result.recyclable ? "#e8f5e9" : "#fce4ec",
+              background: disposalColor(result.disposal),
               borderRadius: "12px", padding: "16px", marginBottom: "16px", textAlign: "center"
             }}>
               <div style={{ fontSize: "48px", marginBottom: "8px" }}>
-                {result.recyclable ? "♻️" : "🗑️"}
+                {disposalEmoji(result.disposal)}
               </div>
               <div style={{ fontWeight: "700", fontSize: "20px", marginBottom: "4px" }}>
-                {result.recyclable ? "Recyclable" : "Not Recyclable"}
+                {disposalLabel(result.disposal)}
               </div>
               <div style={{ fontSize: "14px", color: "#555", marginBottom: "4px" }}>
                 {result.item}
