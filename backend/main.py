@@ -83,10 +83,10 @@ def analyze_image(request: Request, req: ImageRequest):
                     },
                     {
                         "type": "text",
-                        "text": """You are a recycling assistant. Analyze this image and determine if the item shown can be recycled.
+                        "text": """You are a recycling and composting assistant. Analyze this image and determine how to dispose of the item shown.
 
 Respond with ONLY a JSON object, no markdown, no explanation, no code blocks:
-{"recyclable": true or false, "item": "brief name of the item", "reason": "one sentence explanation"}"""
+{"disposal": "recycle", "compost", or "trash", "item": "brief name of the item", "reason": "one sentence explanation"}"""
                     }
                 ],
             }
