@@ -20,6 +20,7 @@ export default function App() {
       const naturalH = img.naturalHeight;
       const containerW = container.clientWidth;
       const containerH = container.clientHeight;
+      console.log("calculate called", { naturalW, naturalH, containerW, containerH });
       const scale = Math.max(containerW / naturalW, containerH / naturalH);
       const renderedW = naturalW * scale;
       const renderedH = naturalH * scale;
