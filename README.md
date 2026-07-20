@@ -4,7 +4,7 @@ Take a photo of any item to instantly find out how to dispose of it.
 
 **Live demo:** https://sift-tawny.vercel.app
 
-![Sift UI](screenshots/desktop.png)
+![Sift UI](screenshots/desktop.jpeg)
 
 ## What it does
 
