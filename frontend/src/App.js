@@ -1,42 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 
 export default function App() {
   const [image, setImage] = useState(null);
   const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [imageScale, setImageScale] = useState(null);
-  const imageRef = useRef(null);
-  const imageContainerRef = useRef(null);
-
-  useEffect(() => {
-    if (!image || !result) return;
-    
-    setTimeout(() => {
-      const img = imageRef.current;
-      const container = imageContainerRef.current;
-      if (!img || !container) return;
-
-      const naturalW = img.naturalWidth;
-      const naturalH = img.naturalHeight;
-      const containerW = container.clientWidth;
-      const containerH = container.clientHeight;
-      if (!naturalW || !naturalH || !containerW || !containerH) return;
-
-      const scale = Math.max(containerW / naturalW, containerH / naturalH);
-      const renderedW = naturalW * scale;
-      const renderedH = naturalH * scale;
-      const cropX = (renderedW - containerW) / 2;
-      const cropY = (renderedH - containerH) / 2;
-
-      setImageScale({
-        scaleX: renderedW / containerW / 100,
-        scaleY: renderedH / containerH / 100,
-        offsetX: -(cropX / containerW) * 100,
-        offsetY: -(cropY / containerH) * 100,
-      });
-    }, 100);
-  }, [image, result]);
 
   function handleUpload(e) {
     const file = e.target.files[0];
@@ -46,7 +14,6 @@ export default function App() {
       setImage(ev.target.result);
       setImageData(ev.target.result.split(",")[1]);
       setResult(null);
-      setImageScale(null);
     };
     reader.readAsDataURL(file);
   }
@@ -81,7 +48,6 @@ export default function App() {
     setImage(null);
     setImageData(null);
     setResult(null);
-    setImageScale(null);
   }
 
   const disposalColor = (disposal) => {
@@ -104,30 +70,22 @@ export default function App() {
 
       <div style={{ width: "100%", maxWidth: "480px", padding: "24px 16px" }}>
 
-        <div
-          ref={imageContainerRef}
-          style={{
-            width: "100%", aspectRatio: "1", background: "#e5e5e5",
-            borderRadius: "16px", overflow: "hidden", position: "relative",
-            marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center"
-          }}
-        >
+        <div style={{
+          width: "100%", aspectRatio: "1", background: "#e5e5e5",
+          borderRadius: "16px", overflow: "hidden", position: "relative",
+          marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center"
+        }}>
           {image ? (
             <>
-              <img
-                ref={imageRef}
-                src={image}
-                alt="captured"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-              {result && result.items && imageScale && result.items.map((item, i) => (
+              <img src={image} alt="captured" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {result && result.items && result.items.map((item, i) => (
                 item.bbox && (
                   <div key={i} style={{
                     position: "absolute",
-                    top: `${imageScale.offsetY + item.bbox.top * imageScale.scaleY}%`,
-                    left: `${imageScale.offsetX + item.bbox.left * imageScale.scaleX}%`,
-                    width: `${item.bbox.width * imageScale.scaleX}%`,
-                    height: `${item.bbox.height * imageScale.scaleY}%`,
+                    top: `${item.bbox.top}%`,
+                    left: `${item.bbox.left}%`,
+                    width: `${item.bbox.width}%`,
+                    height: `${item.bbox.height}%`,
                     border: `2px solid ${disposalColor(item.disposal)}`,
                     borderRadius: "4px",
                     boxSizing: "border-box"
@@ -155,10 +113,7 @@ export default function App() {
               <div style={{ fontSize: "32px", marginBottom: "12px" }}>🔒</div>
               <p style={{ fontWeight: "600", fontSize: "16px", marginBottom: "8px" }}>You've used your 10 free analyses</p>
               <p style={{ color: "#666", fontSize: "14px", marginBottom: "20px" }}>Unlock unlimited analyses for a one-time payment of $3.</p>
-              <button
-                onClick={handleCheckout}
-                style={{ background: "#222", color: "#fff", border: "none", padding: "12px 24px", borderRadius: "8px", fontSize: "15px", cursor: "pointer", width: "100%" }}
-              >
+              <button onClick={handleCheckout} style={{ background: "#222", color: "#fff", border: "none", padding: "12px 24px", borderRadius: "8px", fontSize: "15px", cursor: "pointer", width: "100%" }}>
                 Unlock unlimited — $3
               </button>
             </div>
@@ -214,17 +169,11 @@ export default function App() {
           {image && !loading && (
             <>
               {!result && (
-                <button
-                  onClick={analyze}
-                  style={{ padding: "14px", borderRadius: "10px", background: "#222", color: "#fff", border: "none", fontSize: "15px", cursor: "pointer" }}
-                >
+                <button onClick={analyze} style={{ padding: "14px", borderRadius: "10px", background: "#222", color: "#fff", border: "none", fontSize: "15px", cursor: "pointer" }}>
                   Analyze
                 </button>
               )}
-              <button
-                onClick={reset}
-                style={{ padding: "14px", borderRadius: "10px", background: "#fff", color: "#222", border: "1px solid #ddd", fontSize: "15px", cursor: "pointer" }}
-              >
+              <button onClick={reset} style={{ padding: "14px", borderRadius: "10px", background: "#fff", color: "#222", border: "1px solid #ddd", fontSize: "15px", cursor: "pointer" }}>
                 Try another
               </button>
             </>
