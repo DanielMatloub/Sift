@@ -30,7 +30,6 @@ export default function App() {
       });
       const data = await res.json();
       setResult(data);
-      console.log(data);
     } catch (err) {
       setResult({ error: "Something went wrong. Try again." });
     }
@@ -50,6 +49,12 @@ export default function App() {
     setImageData(null);
     setResult(null);
   }
+
+  const disposalColor = (disposal) => {
+    if (disposal === "recycle") return "#388e3c";
+    if (disposal === "compost") return "#f57f17";
+    return "#c62828";
+  };
 
   return (
     <div style={{
@@ -71,7 +76,32 @@ export default function App() {
           marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center"
         }}>
           {image ? (
-            <img src={image} alt="captured" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <>
+              <img src={image} alt="captured" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {result && result.items && result.items.map((item, i) => (
+                item.bbox && (
+                  <div key={i} style={{
+                    position: "absolute",
+                    top: `${item.bbox.top}%`,
+                    left: `${item.bbox.left}%`,
+                    width: `${item.bbox.width}%`,
+                    height: `${item.bbox.height}%`,
+                    border: `2px solid ${disposalColor(item.disposal)}`,
+                    borderRadius: "4px",
+                    boxSizing: "border-box"
+                  }}>
+                    <div style={{
+                      position: "absolute", top: "-20px", left: "0",
+                      background: disposalColor(item.disposal),
+                      color: "#fff", fontSize: "10px", padding: "1px 5px",
+                      borderRadius: "3px", whiteSpace: "nowrap"
+                    }}>
+                      {item.disposal === "recycle" ? "♻️" : item.disposal === "compost" ? "🌱" : "🗑️"} {item.item}
+                    </div>
+                  </div>
+                )
+              ))}
+            </>
           ) : (
             <span style={{ color: "#aaa", fontSize: "14px" }}>No image selected</span>
           )}
