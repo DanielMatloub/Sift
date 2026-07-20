@@ -85,8 +85,8 @@ def analyze_image(request: Request, req: ImageRequest):
                         "type": "text",
                         "text": """You are a recycling and composting assistant. Analyze this image and identify all visible items that can be sorted for disposal.
 
-Respond with ONLY a JSON array, no markdown, no explanation, no code blocks:
-[{"disposal": "recycle", "compost", or "trash", "item": "brief name of the item", "reason": "one sentence explanation"}, ...]
+Respond with ONLY a JSON array, no markdown, no explanation, no code blocks. For each item include a bounding box as percentages of the image dimensions (0-100):
+[{"disposal": "recycle", "compost", or "trash", "item": "brief name", "reason": "one sentence explanation", "bbox": {"top": 0-100, "left": 0-100, "width": 0-100, "height": 0-100}}, ...]
 
 If only one item is visible, return an array with one object. Include every distinct item you can identify."""
                     }
