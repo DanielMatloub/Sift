@@ -83,10 +83,12 @@ def analyze_image(request: Request, req: ImageRequest):
                     },
                     {
                         "type": "text",
-                        "text": """You are a recycling and composting assistant. Analyze this image and determine how to dispose of the item shown.
+                        "text": """You are a recycling and composting assistant. Analyze this image and identify all visible items that can be sorted for disposal.
 
-Respond with ONLY a JSON object, no markdown, no explanation, no code blocks:
-{"disposal": "recycle", "compost", or "trash", "item": "brief name of the item", "reason": "one sentence explanation"}"""
+Respond with ONLY a JSON array, no markdown, no explanation, no code blocks:
+[{"disposal": "recycle", "compost", or "trash", "item": "brief name of the item", "reason": "one sentence explanation"}, ...]
+
+If only one item is visible, return an array with one object. Include every distinct item you can identify."""
                     }
                 ],
             }
@@ -100,10 +102,11 @@ Respond with ONLY a JSON object, no markdown, no explanation, no code blocks:
             text = text[4:]
     text = text.strip()
     result = json.loads(text)
-
+    if isinstance(result, dict):
+        result = [result]
+    
     increment_ip_usage(ip)
-    result["analyses_remaining"] = FREE_LIMIT - analysis_count - 1
-    return result
+    return {"items": result, "analyses_remaining": FREE_LIMIT - analysis_count - 1}
 
 @app.post("/create-checkout-session")
 async def create_checkout_session(request: Request):
