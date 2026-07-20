@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function App() {
   const [image, setImage] = useState(null);
@@ -9,33 +9,37 @@ export default function App() {
   const imageRef = useRef(null);
   const imageContainerRef = useRef(null);
 
-  function handleImageLoad() {
+  useEffect(() => {
+    if (!image) return;
     const img = imageRef.current;
     const container = imageContainerRef.current;
     if (!img || !container) return;
 
-    const naturalW = img.naturalWidth;
-    const naturalH = img.naturalHeight;
-    const containerW = container.clientWidth;
-    const containerH = container.clientHeight;
+    const calculate = () => {
+      const naturalW = img.naturalWidth;
+      const naturalH = img.naturalHeight;
+      const containerW = container.clientWidth;
+      const containerH = container.clientHeight;
+      const scale = Math.max(containerW / naturalW, containerH / naturalH);
+      const renderedW = naturalW * scale;
+      const renderedH = naturalH * scale;
+      const cropX = (renderedW - containerW) / 2;
+      const cropY = (renderedH - containerH) / 2;
+      setImageScale({
+        scaleX: renderedW / containerW / 100,
+        scaleY: renderedH / containerH / 100,
+        offsetX: -(cropX / containerW) * 100,
+        offsetY: -(cropY / containerH) * 100,
+      });
+    };
 
-    const scaleX = containerW / naturalW;
-    const scaleY = containerH / naturalH;
-    const scale = Math.max(scaleX, scaleY);
-
-    const renderedW = naturalW * scale;
-    const renderedH = naturalH * scale;
-
-    const cropX = (renderedW - containerW) / 2;
-    const cropY = (renderedH - containerH) / 2;
-
-    setImageScale({
-      scaleX: renderedW / containerW / 100,
-      scaleY: renderedH / containerH / 100,
-      offsetX: -(cropX / containerW) * 100,
-      offsetY: -(cropY / containerH) * 100,
-    });
-  }
+    if (img.complete) {
+      calculate();
+    } else {
+      img.addEventListener("load", calculate);
+      return () => img.removeEventListener("load", calculate);
+    }
+  }, [image, result]);
 
   function handleUpload(e) {
     const file = e.target.files[0];
@@ -117,7 +121,6 @@ export default function App() {
                 ref={imageRef}
                 src={image}
                 alt="captured"
-                onLoad={handleImageLoad}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
               {result && result.items && imageScale && result.items.map((item, i) => (
