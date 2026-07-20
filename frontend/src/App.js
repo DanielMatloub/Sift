@@ -30,6 +30,7 @@ export default function App() {
       });
       const data = await res.json();
       setResult(data);
+      console.log(data);
     } catch (err) {
       setResult({ error: "Something went wrong. Try again." });
     }
