@@ -50,24 +50,6 @@ export default function App() {
     setResult(null);
   }
 
-  const disposalColor = (disposal) => {
-    if (disposal === "recycle") return "#e8f5e9";
-    if (disposal === "compost") return "#fff8e1";
-    return "#fce4ec";
-  };
-
-  const disposalEmoji = (disposal) => {
-    if (disposal === "recycle") return "♻️";
-    if (disposal === "compost") return "🌱";
-    return "🗑️";
-  };
-
-  const disposalLabel = (disposal) => {
-    if (disposal === "recycle") return "Recyclable";
-    if (disposal === "compost") return "Compostable";
-    return "Trash";
-  };
-
   return (
     <div style={{
       minHeight: "100vh", background: "#f5f5f3", fontFamily: "sans-serif",
@@ -102,11 +84,7 @@ export default function App() {
               <p style={{ color: "#666", fontSize: "14px", marginBottom: "20px" }}>Unlock unlimited analyses for a one-time payment of $3.</p>
               <button
                 onClick={handleCheckout}
-                style={{
-                  background: "#222", color: "#fff", border: "none",
-                  padding: "12px 24px", borderRadius: "8px", fontSize: "15px",
-                  cursor: "pointer", width: "100%"
-                }}
+                style={{ background: "#222", color: "#fff", border: "none", padding: "12px 24px", borderRadius: "8px", fontSize: "15px", cursor: "pointer", width: "100%" }}
               >
                 Unlock unlimited — $3
               </button>
@@ -116,24 +94,25 @@ export default function App() {
               <p style={{ color: "#888" }}>{result.error}</p>
             </div>
           ) : (
-            <div style={{
-              background: disposalColor(result.disposal),
-              borderRadius: "12px", padding: "16px", marginBottom: "16px", textAlign: "center"
-            }}>
-              <div style={{ fontSize: "48px", marginBottom: "8px" }}>
-                {disposalEmoji(result.disposal)}
-              </div>
-              <div style={{ fontWeight: "700", fontSize: "20px", marginBottom: "4px" }}>
-                {disposalLabel(result.disposal)}
-              </div>
-              <div style={{ fontSize: "14px", color: "#555", marginBottom: "4px" }}>
-                {result.item}
-              </div>
-              <div style={{ fontSize: "13px", color: "#777", marginBottom: "8px" }}>
-                {result.reason}
-              </div>
+            <div style={{ marginBottom: "16px" }}>
+              {result.items.map((item, i) => (
+                <div key={i} style={{
+                  background: item.disposal === "recycle" ? "#e8f5e9" : item.disposal === "compost" ? "#fff8e1" : "#fce4ec",
+                  borderRadius: "12px", padding: "14px 16px", marginBottom: "10px",
+                  display: "flex", alignItems: "flex-start", gap: "12px"
+                }}>
+                  <div style={{ fontSize: "28px", flexShrink: 0 }}>
+                    {item.disposal === "recycle" ? "♻️" : item.disposal === "compost" ? "🌱" : "🗑️"}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: "700", fontSize: "15px", marginBottom: "2px" }}>{item.item}</div>
+                    <div style={{ fontSize: "12px", color: "#555", textTransform: "capitalize", marginBottom: "4px" }}>{item.disposal}</div>
+                    <div style={{ fontSize: "13px", color: "#777" }}>{item.reason}</div>
+                  </div>
+                </div>
+              ))}
               {result.analyses_remaining !== undefined && result.analyses_remaining <= 3 && (
-                <p style={{ color: "#888", fontSize: "12px", marginTop: "8px" }}>
+                <p style={{ color: "#888", fontSize: "12px", marginTop: "8px", textAlign: "center" }}>
                   {result.analyses_remaining} free {result.analyses_remaining === 1 ? "analysis" : "analyses"} remaining.
                 </p>
               )}
@@ -164,20 +143,14 @@ export default function App() {
               {!result && (
                 <button
                   onClick={analyze}
-                  style={{
-                    padding: "14px", borderRadius: "10px", background: "#222",
-                    color: "#fff", border: "none", fontSize: "15px", cursor: "pointer"
-                  }}
+                  style={{ padding: "14px", borderRadius: "10px", background: "#222", color: "#fff", border: "none", fontSize: "15px", cursor: "pointer" }}
                 >
                   Analyze
                 </button>
               )}
               <button
                 onClick={reset}
-                style={{
-                  padding: "14px", borderRadius: "10px", background: "#fff",
-                  color: "#222", border: "1px solid #ddd", fontSize: "15px", cursor: "pointer"
-                }}
+                style={{ padding: "14px", borderRadius: "10px", background: "#fff", color: "#222", border: "1px solid #ddd", fontSize: "15px", cursor: "pointer" }}
               >
                 Try another
               </button>
