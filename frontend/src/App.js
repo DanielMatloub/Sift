@@ -34,7 +34,7 @@ export default function App() {
     };
 
     if (img.complete) {
-      calculate();
+      setTimeout(calculate, 50);
     } else {
       img.addEventListener("load", calculate);
       return () => img.removeEventListener("load", calculate);
