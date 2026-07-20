@@ -10,36 +10,32 @@ export default function App() {
   const imageContainerRef = useRef(null);
 
   useEffect(() => {
-    if (!image) return;
-    const img = imageRef.current;
-    const container = imageContainerRef.current;
-    if (!img || !container) return;
+    if (!image || !result) return;
+    
+    setTimeout(() => {
+      const img = imageRef.current;
+      const container = imageContainerRef.current;
+      if (!img || !container) return;
 
-    const calculate = () => {
       const naturalW = img.naturalWidth;
       const naturalH = img.naturalHeight;
       const containerW = container.clientWidth;
       const containerH = container.clientHeight;
-      console.log("calculate called", { naturalW, naturalH, containerW, containerH });
+      if (!naturalW || !naturalH || !containerW || !containerH) return;
+
       const scale = Math.max(containerW / naturalW, containerH / naturalH);
       const renderedW = naturalW * scale;
       const renderedH = naturalH * scale;
       const cropX = (renderedW - containerW) / 2;
       const cropY = (renderedH - containerH) / 2;
+
       setImageScale({
         scaleX: renderedW / containerW / 100,
         scaleY: renderedH / containerH / 100,
         offsetX: -(cropX / containerW) * 100,
         offsetY: -(cropY / containerH) * 100,
       });
-    };
-
-    if (img.complete) {
-      setTimeout(calculate, 50);
-    } else {
-      img.addEventListener("load", calculate);
-      return () => img.removeEventListener("load", calculate);
-    }
+    }, 100);
   }, [image, result]);
 
   function handleUpload(e) {
