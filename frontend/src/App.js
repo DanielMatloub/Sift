@@ -1,10 +1,41 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function App() {
   const [image, setImage] = useState(null);
   const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [imageScale, setImageScale] = useState(null);
+  const imageRef = useRef(null);
+  const imageContainerRef = useRef(null);
+
+  function handleImageLoad() {
+    const img = imageRef.current;
+    const container = imageContainerRef.current;
+    if (!img || !container) return;
+
+    const naturalW = img.naturalWidth;
+    const naturalH = img.naturalHeight;
+    const containerW = container.clientWidth;
+    const containerH = container.clientHeight;
+
+    const scaleX = containerW / naturalW;
+    const scaleY = containerH / naturalH;
+    const scale = Math.max(scaleX, scaleY);
+
+    const renderedW = naturalW * scale;
+    const renderedH = naturalH * scale;
+
+    const cropX = (renderedW - containerW) / 2;
+    const cropY = (renderedH - containerH) / 2;
+
+    setImageScale({
+      scaleX: renderedW / containerW / 100,
+      scaleY: renderedH / containerH / 100,
+      offsetX: -(cropX / containerW) * 100,
+      offsetY: -(cropY / containerH) * 100,
+    });
+  }
 
   function handleUpload(e) {
     const file = e.target.files[0];
@@ -14,6 +45,7 @@ export default function App() {
       setImage(ev.target.result);
       setImageData(ev.target.result.split(",")[1]);
       setResult(null);
+      setImageScale(null);
     };
     reader.readAsDataURL(file);
   }
@@ -48,6 +80,7 @@ export default function App() {
     setImage(null);
     setImageData(null);
     setResult(null);
+    setImageScale(null);
   }
 
   const disposalColor = (disposal) => {
@@ -70,22 +103,31 @@ export default function App() {
 
       <div style={{ width: "100%", maxWidth: "480px", padding: "24px 16px" }}>
 
-        <div style={{
-          width: "100%", aspectRatio: "1", background: "#e5e5e5",
-          borderRadius: "16px", overflow: "hidden", position: "relative",
-          marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center"
-        }}>
+        <div
+          ref={imageContainerRef}
+          style={{
+            width: "100%", aspectRatio: "1", background: "#e5e5e5",
+            borderRadius: "16px", overflow: "hidden", position: "relative",
+            marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "center"
+          }}
+        >
           {image ? (
             <>
-              <img src={image} alt="captured" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              {result && result.items && result.items.map((item, i) => (
+              <img
+                ref={imageRef}
+                src={image}
+                alt="captured"
+                onLoad={handleImageLoad}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              {result && result.items && imageScale && result.items.map((item, i) => (
                 item.bbox && (
                   <div key={i} style={{
                     position: "absolute",
-                    top: `${item.bbox.top}%`,
-                    left: `${item.bbox.left}%`,
-                    width: `${item.bbox.width}%`,
-                    height: `${item.bbox.height}%`,
+                    top: `${imageScale.offsetY + item.bbox.top * imageScale.scaleY}%`,
+                    left: `${imageScale.offsetX + item.bbox.left * imageScale.scaleX}%`,
+                    width: `${item.bbox.width * imageScale.scaleX}%`,
+                    height: `${item.bbox.height * imageScale.scaleY}%`,
                     border: `2px solid ${disposalColor(item.disposal)}`,
                     borderRadius: "4px",
                     boxSizing: "border-box"
